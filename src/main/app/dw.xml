@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+    <http:listener-config name="HTTP_Listener_Configuration" host="0.0.0.0" port="8083" doc:name="HTTP Listener Configuration"/>
+    <flow name="dwFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/" doc:name="HTTP"/>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+%var payload= {
+ "Hello":{
+ 	"Hello1a":"1a",
+	"Hello2a":"2a",
+	"Hello3a":"3a",
+	"Hello4a":"4a"
+	}
+	
+}
+---
+{
+e:payload.Hello reduce ($$ ++ '-' ++ $)
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <set-session-variable variableName="name" value="#[message.inboundProperties.'http.query.params'.name]" doc:name="Session Variable"/>
+        <logger message="#[sessionVars.name]" level="INFO" doc:name="Logger"/>
+    </flow>
+    <flow name="dwFlow2">
+        <logger level="INFO" doc:name="Logger"/>
+        <dw:transform-message doc:name="Transform Message" metadata:id="a49cc58f-592e-482f-b8ca-1d3dda59e0e1">
+            <dw:input-payload doc:sample="C:\Users\Chennappa\Desktop\java.json" mimeType="application/json"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+---
+salesforce: {
+ 
+     (payload map 
+     sales: {
+         Title:$.title,
+         Author:$.author,
+         Book:$.book
+     })
+ }]]></dw:set-payload>
+        </dw:transform-message>
+    </flow>
+    <flow name="dwFlow1">
+        <logger message="#[sessionVars.]" level="INFO" doc:name="Logger"/>
+    </flow>
+</mule>
